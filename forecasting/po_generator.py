@@ -1,6 +1,6 @@
 import math
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 DEFAULT_VENDOR = "VENDOR_1"
 
@@ -46,7 +46,7 @@ def generate_draft_pos(forecast_df, inventory_df, snapshot_ts, vendor_lookup_fn)
             continue
 
         vendor = vendor_lookup_fn(product_id, item_meta)
-        eta = (datetime.utcnow() + timedelta(days=int(item_meta.get('lead_time_days', 0)))).date().isoformat()
+        eta = (datetime.now(timezone.utc) + timedelta(days=int(item_meta.get('lead_time_days', 0)))).date().isoformat()
 
         draft = {
             'po_id': make_draft_id(product_id, snapshot_ts),
@@ -67,7 +67,7 @@ def generate_draft_pos(forecast_df, inventory_df, snapshot_ts, vendor_lookup_fn)
             'reorder_reason': ';'.join(br['reasons']) if br['reasons'] else 'forecast_shortfall',
             'commentary': '',
             'created_by': 'system',
-            'created_at': datetime.utcnow().isoformat(),
+            'created_at': datetime.now(timezone.utc).isoformat() ,
             'source_snapshot_id': snapshot_ts,
             'status': 'draft'
         }

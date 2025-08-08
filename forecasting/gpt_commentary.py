@@ -6,8 +6,16 @@ load_dotenv()
 USE_REAL_GPT = os.getenv("USE_REAL_GPT", "false").lower() == 'true'
 
 def _mock_comment(item):
-    return (f"Mock commentary: Product {item['product_id']} has {item.get('current_stock')} units left. " 
-            f"Estimated depletion in {item['days_until_depletion']:.1f} days. Suggested to reorder {item['suggested_qty']} units.")
+    suggested = item.get('suggested_qty', item.get('qty', 0))  
+    return (
+        f"Estimated depletion in {item.get('days_until_depletion', 0):.1f} days. "
+        f"Suggested to reorder {suggested} units."
+    )
+
+
+# def _mock_comment(item):
+#     return (f"Mock commentary: Product {item['product_id']} has {item.get('current_stock')} units left. " 
+#             f"Estimated depletion in {item['days_until_depletion']:.1f} days. Suggested to reorder {item['suggested_qty']} units.")
 
 def generate_commentary(item):
     if not USE_REAL_GPT:

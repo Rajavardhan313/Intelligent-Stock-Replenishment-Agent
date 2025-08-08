@@ -6,9 +6,9 @@ from sap.extract_po_history import extract_po_history
 from forecasting.forecasting_pipeline import run_forecast
 from forecasting.po_generator import generate_draft_pos
 from forecasting.gpt_commentary import generate_commentary
-from notifier import send_slack_message
+from alerts.notifier import send_alert
 import pandas as pd
-from datetime import datetime
+from datetime import datetime,timezone, timedelta
 import os
 import json
 
@@ -18,7 +18,7 @@ def default_vendor_lookup(product_id, meta):
 def main():
     inv = extract_inventory()
     po_hist = extract_po_history()
-    snapshot_ts = datetime.utcnow().isoformat()
+    snapshot_ts = datetime.now(timezone.utc).isoformat()
     forecast = run_forecast(inv)
     draft_list = generate_draft_pos(forecast, inv, snapshot_ts, default_vendor_lookup)
 
@@ -32,9 +32,15 @@ def main():
         d['days_until_depletion'] = row.get('days_until_depletion')
         d['commentary'] = generate_commentary(d)
         drafts.append(d)
-        # notify
-        send_slack_message(f"Draft PO for {d['product_id']}: qty={d['qty']}\n{d['commentary']}")
-    df = pd.DataFrame(drafts)
+
+        # prepare alert
+        subject = f"Draft PO Alert - {d['product_id']}"
+        alert_msg = f"Draft PO for {d['product_id']}: qty={d['qty']}\n{d['commentary']}"
+
+        # send Email + Teams (via notifier)
+        send_alert(subject, alert_msg)
+
+        df = pd.DataFrame(drafts)
     out_path = os.path.join('output', 'draft_pos.csv')
     df.to_csv(out_path, index=False)
     print('Wrote', out_path)
