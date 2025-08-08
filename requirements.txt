@@ -1,0 +1,13 @@
+pandas
+numpy
+matplotlib
+scikit-learn
+statsmodels
+python-dotenv
+hdbcli
+openai
+fastapi
+uvicorn
+requests
+pytest
+joblib

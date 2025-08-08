@@ -1,0 +1,4 @@
+po_number,material_id,order_qty,received_qty,delivery_date,vendor
+PO1001,P001,500,500,2025-06-10,VENDOR_1
+PO1002,P002,200,200,2025-07-05,VENDOR_2
+PO1003,P001,300,300,2024-12-20,VENDOR_1
